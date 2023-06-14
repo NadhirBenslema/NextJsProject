@@ -1,4 +1,11 @@
-function handler(req,res){
+const { MongoClient } = require('mongodb');
+
+async function handler(req,res){
+    const eventId=req.query.eventId;
+
+    const client=await MongoClient.connect('mongodb://127.0.0.1:27017/events');
+                    
+
     if(req.method ==='POST'){
         const {email,name,text}=req.body;
         if(!email.includes('@') || 
@@ -13,24 +20,33 @@ function handler(req,res){
         }
 
         const newComment={
-            id:new Date().toISOString(),
             email,
             name,
             text,
+            eventId
         };
-        console.log(email,name,text);
+        const db = client.db();
+        const result = await db.collection('comments').insertOne(newComment);
+
+        console.log(result);
+
+        newComment.id=result.insertedId;
         res.status(201).json({message:'Added comment'});
         
     }
 
     if(req.method ==='GET'){
-        const dummyList = [
-            {id:'c1',name:'Max',text:'A first Comment!'},
-            {id:'c2',name:'Manuel',text:'A second Comment!'},
-        ];
-        res.status(200).json({comments:dummyList});
+        const db = client.db();
+        const documents = await db.
+        collection('comments')
+        .find()
+        .sort({_id:-1})
+        .toArray();
+       
+        res.status(200).json({comments:documents});
        
     }
+    client.close();
 
 }
 export default handler;

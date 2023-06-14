@@ -11,10 +11,10 @@ async function handler(req,res){
         }
 
 
-        const client=await MongoClient.connect('mongodb://127.0.0.1:27017/newsletter');
+        const client=await MongoClient.connect('mongodb://127.0.0.1:27017/events');
         
             const db = client.db();
-            await db.collection('emails').insertOne({email:userEmail});
+            await db.collection('newsletter').insertOne({email:userEmail});
 
             client.close();
 
